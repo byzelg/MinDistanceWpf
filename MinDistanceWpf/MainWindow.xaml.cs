@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -61,9 +62,16 @@ namespace MinDistanceWpf
 
             _unvisitedBrush = new SolidColorBrush(Colors.Black);
             _visitedBrush = new SolidColorBrush(Colors.DarkViolet);
-
         }
 
+
+        DataGrid dg = new DataGrid();
+
+        public void window1_Loaded(object sender, EventArgs e)
+        {
+            dg.Columns.Add(typeof(int));
+
+        }
 
         /// <summary>
         /// The event establishes the all the GUI interactions with the user:
@@ -75,11 +83,13 @@ namespace MinDistanceWpf
         /// <param name="e"></param>
         public void DrawingCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            statusLabel.Content = "beyza";
+
             if (e.LeftButton == MouseButtonState.Released)
             {
                 Point clickPoint = e.GetPosition(drawingCanvas);
 
-                if (HasClickedOnNode(clickPoint.X, clickPoint.Y))   //Todo: Tıklanan 1. ve 2. düğümün koordinatları
+                if (HasClickedOnNode(clickPoint.X, clickPoint.Y))   //Todo: Tıklanan düğümün 1. ve 2. koordinatları
                 {
                     //if (rbBellman.IsChecked == true)
                     //    rbBellmanDurumBool = true;
@@ -129,7 +139,7 @@ namespace MinDistanceWpf
                             }
                             ClearEdgeNodes();
                         }
-                    }                   
+                    }
                 }
                 else
                 {
@@ -269,7 +279,7 @@ namespace MinDistanceWpf
             double distance = 0.0;
             if (rbBellman.IsChecked == true || rbDijkstra.IsChecked == true)
             {
-                
+
                 DistanceDialog dd = new DistanceDialog();
                 dd.Owner = this;
 
@@ -339,7 +349,7 @@ namespace MinDistanceWpf
         /// Paint a single node on the canvas
         /// </summary>
         /// <param name="node">A node object carrying the coordinates</param>
-        public void PaintNode(Node node)
+        public void PaintNode(Node node)    //her düğüm oluşturulduğunda çalışıyor.
         {
             //paint the node
             Ellipse ellipse = new Ellipse();
@@ -394,6 +404,7 @@ namespace MinDistanceWpf
             line.StrokeThickness = 1;
             line.SetValue(Canvas.ZIndexProperty, 1);
             drawingCanvas.Children.Add(line);
+
 
             //draw the distance label
             Point edgeLabelPoint = GetEdgeLabelCoordinate(edge);
@@ -502,25 +513,25 @@ namespace MinDistanceWpf
             _cloud.Add(currentNode);
             ReachableNode currentReachableNode;
 
-           /* Application.Current.Dispatcher.Invoke((Action)delegate
-            {
-                RowDefinition rowDef1 = new RowDefinition();
-                // TODO: s1s0 start node yazma
-                txt2 = new TextBlock();
-                txt2.Text = start.Label;
-                txt2.FontSize = 12;
-                txt2.TextAlignment = TextAlignment.Center;
-                Grid.SetRow(txt2, 1);
-                Grid.SetColumn(txt2, 0);
+            /* Application.Current.Dispatcher.Invoke((Action)delegate
+             {
+                 RowDefinition rowDef1 = new RowDefinition();
+                 // TODO: s1s0 start node yazma
+                 txt2 = new TextBlock();
+                 txt2.Text = start.Label;
+                 txt2.FontSize = 12;
+                 txt2.TextAlignment = TextAlignment.Center;
+                 Grid.SetRow(txt2, 1);
+                 Grid.SetColumn(txt2, 0);
 
-                myGrid.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
-                           (ThreadStart)delegate ()
-                           {
-                               myGrid.RowDefinitions.Add(rowDef1);
-                               myGrid.Children.Add(txt2);
-                           });
-                Thread.Sleep(100);
-            });*/
+                 myGrid.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
+                            (ThreadStart)delegate ()
+                            {
+                                myGrid.RowDefinitions.Add(rowDef1);
+                                myGrid.Children.Add(txt2);
+                            });
+                 Thread.Sleep(100);
+             });*/
             while (currentNode != end)
             {
                 DijkstraAddReachableNodes(currentNode);     // Komşu düğümleri kenarlarla bağlar
@@ -619,6 +630,7 @@ namespace MinDistanceWpf
 
                 start.Visited = true;
                 statusLabel.Content = "Yol Maliyeti: " + totalCost.ToString();
+
             }
             else
             {
@@ -700,32 +712,32 @@ namespace MinDistanceWpf
                 //    Thread.Sleep(100);
                 //});
                 //buraya
-               /* Application.Current.Dispatcher.Invoke((Action)delegate
-                {
-                    //TODO: ADD (kenar,...)
-                    txtSatir = new TextBlock();
-                    txtSatir.Text = neighbour.Edges[0].Length + "," + txt2.Text;
-                    txtSatir.FontSize = 12;
-                    txtSatir.TextAlignment = TextAlignment.Center;
-                    for (int j = 1; j < _nodes.Count; j++)
-                    {//TODO: sıkıntı burada kayma var!
-                        if (neighbour.Label != txt2.Text && neighbour.Label == dizi[j]) //kayma komşular
-                        {
-                            Console.WriteLine(j + ". Komşu: \n" + txtSatir.Text);
-                            Grid.SetColumn(txtSatir, j);
-                        }
-                    }
+                /* Application.Current.Dispatcher.Invoke((Action)delegate
+                 {
+                     //TODO: ADD (kenar,...)
+                     txtSatir = new TextBlock();
+                     txtSatir.Text = neighbour.Edges[0].Length + "," + txt2.Text;
+                     txtSatir.FontSize = 12;
+                     txtSatir.TextAlignment = TextAlignment.Center;
+                     for (int j = 1; j < _nodes.Count; j++)
+                     {//TODO: sıkıntı burada kayma var!
+                         if (neighbour.Label != txt2.Text && neighbour.Label == dizi[j]) //kayma komşular
+                         {
+                             Console.WriteLine(j + ". Komşu: \n" + txtSatir.Text);
+                             Grid.SetColumn(txtSatir, j);
+                         }
+                     }
 
-                    Grid.SetRow(txtSatir, 1);
+                     Grid.SetRow(txtSatir, 1);
 
-                    myGrid.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
-                        (ThreadStart)delegate ()
-                        {
-                            myGrid.Children.Add(txtSatir);
+                     myGrid.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
+                         (ThreadStart)delegate ()
+                         {
+                             myGrid.Children.Add(txtSatir);
 
-                        });
-                    Thread.Sleep(100);
-                });*/
+                         });
+                     Thread.Sleep(100);
+                 });*/
                 //make sure we don't add the node we came from
                 //geldiğimiz düğümü eklememek için
                 if (node.EdgeCameFrom == null || neighbour != GetNeighbour(node, node.EdgeCameFrom))
@@ -812,6 +824,7 @@ namespace MinDistanceWpf
             Clear();
             PaintAllNodes();
             PaintAllEdges();
+
         }
 
         public void Clear()
@@ -831,7 +844,7 @@ namespace MinDistanceWpf
             foreach (var textBox in textboxes)
                 textBox.Text = String.Empty;
             this._cloud.Clear();
-            
+
             this._findMinDistance = false;
             statusLabel.Content = "";
 
@@ -857,6 +870,11 @@ namespace MinDistanceWpf
             this._findMinDistance = false;
             this._count = 1;
             statusLabel.Content = "";
+        }
+
+        private void window1_Loaded(object sender, RoutedEventArgs e)
+        {
+
         }
 
         public void PaintAllNodes()
