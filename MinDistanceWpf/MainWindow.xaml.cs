@@ -1,8 +1,7 @@
-﻿using MinDistanceWpf.Classes;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,7 +9,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Windows.Threading;
+using MinDistanceWpf.Classes;
 
 namespace MinDistanceWpf
 {
@@ -19,7 +18,6 @@ namespace MinDistanceWpf
     /// </summary>
     public partial class MainWindow : Window
     {
-
         public const double _diameter = 30;
         public const double _edgeLabelSize = 20;
 
@@ -41,6 +39,7 @@ namespace MinDistanceWpf
         public bool rbBellmanDurumBool = false;
 
 
+
         string[] dizi = new string[50];
 
         TextBlock txtSatir, txt2;
@@ -48,6 +47,7 @@ namespace MinDistanceWpf
         public MainWindow()
         {
             InitializeComponent();
+
             drawingCanvas.SetValue(Canvas.ZIndexProperty, 0);
 
             _cloud = new List<Node>();
@@ -62,16 +62,39 @@ namespace MinDistanceWpf
 
             _unvisitedBrush = new SolidColorBrush(Colors.Black);
             _visitedBrush = new SolidColorBrush(Colors.DarkViolet);
+
+            _tbl.Columns.Add($"ID", typeof(string));
         }
 
 
-        DataGrid dg = new DataGrid();
+        DataTable _tbl = new DataTable();
 
-        public void window1_Loaded(object sender, EventArgs e)
+        public void Grid_AddColumn(int index)
         {
-            dg.Columns.Add(typeof(int));
-
+            _tbl.Columns.Add($"C{index}", typeof(string));
         }
+
+        public void Grid_AddRow(int id)
+        {
+            DataRow row = _tbl.NewRow();
+            row.SetField(0, id);
+            _tbl.Rows.Add(row);
+        }
+
+
+        public void Grid_BindData()
+        {
+
+            DG2.ItemsSource = null;
+            DG2.ItemsSource = _tbl.DefaultView;
+        }
+
+        public void tablo(object myrows)
+        {
+            DataGrid DG2 = new DataGrid();
+        }
+
+
 
         /// <summary>
         /// The event establishes the all the GUI interactions with the user:
@@ -81,10 +104,11 @@ namespace MinDistanceWpf
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
+
+
+
         public void DrawingCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            statusLabel.Content = "beyza";
-
             if (e.LeftButton == MouseButtonState.Released)
             {
                 Point clickPoint = e.GetPosition(drawingCanvas);
@@ -134,6 +158,9 @@ namespace MinDistanceWpf
                                     _edgeNode2.Edges.Add(edge);
 
                                     PaintEdge(edge);
+;
+                                    //_tbl.Rows[int.Parse(_edgeNode2.Label) - 1][$"C{_edgeNode1.Label}"] = distance;
+
                                     //TODO: RadioButton'lar sonradan değiştirilememeli!!
                                 }
                             }
@@ -148,6 +175,11 @@ namespace MinDistanceWpf
                         Node n = CreateNode(clickPoint);
                         _nodes.Add(n);
                         PaintNode(n);
+
+                        Grid_AddColumn(_count);
+                        Grid_AddRow(_count);
+                        Grid_BindData();
+
                         _count++;
                         ClearEdgeNodes();
                     }
@@ -200,6 +232,7 @@ namespace MinDistanceWpf
                     return false;
             }
         }
+
 
         public void ClearEdgeNodes()
         {
@@ -285,6 +318,8 @@ namespace MinDistanceWpf
 
                 dd.ShowDialog();
                 distance = dd.Distance;
+
+
             }
             else
                 MessageBox.Show("Kenar girebilmek için önce bir algoritma seçiniz!", "Hata", MessageBoxButton.OK, MessageBoxImage.Hand);
@@ -342,6 +377,7 @@ namespace MinDistanceWpf
             double nodeCenterX = p.X - _diameter / 2;
             double nodeCenterY = p.Y - _diameter / 2;
             Node newNode = new Node(new Point(nodeCenterX, nodeCenterY), p, _count.ToString(), _diameter);
+
             return newNode;
         }
 
@@ -379,6 +415,7 @@ namespace MinDistanceWpf
 
             //add to canvas on top of the cirle
             drawingCanvas.Children.Add(tb);
+
         }
 
         public Edge CreateEdge(Node node1, Node node2, double distance)
@@ -494,6 +531,7 @@ namespace MinDistanceWpf
                 //mark the edge as visited
                 currentReachableNode.Edge.Visited = true;
 
+                
                 _cloud.Add(currentNode);
             }
         }
@@ -631,6 +669,8 @@ namespace MinDistanceWpf
                 start.Visited = true;
                 statusLabel.Content = "Yol Maliyeti: " + totalCost.ToString();
 
+                _tbl.Rows[int.Parse(start.Label) - 1][$"C{end.Label}"] = totalCost;
+                _tbl.Rows[int.Parse(end.Label) - 1][$"C{start.Label}"] = totalCost;
             }
             else
             {
@@ -872,10 +912,6 @@ namespace MinDistanceWpf
             statusLabel.Content = "";
         }
 
-        private void window1_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
 
         public void PaintAllNodes()
         {
@@ -893,6 +929,14 @@ namespace MinDistanceWpf
         {
             Restart();
             drawingCanvas.Children.Clear();
+            _tbl.Clear();
+            _tbl.Columns.Clear();
+            _tbl.Columns.Add($"ID", typeof(string));
         }
     }
 }
+
+
+
+
+
